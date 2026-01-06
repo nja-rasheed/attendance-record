@@ -1,0 +1,14 @@
+Idea:
+attendance percentage tracker.
+Functionality:
+1. add subject
+2. mark attendance
+    2.1. select subject
+    2.2. select date
+    2.3. mark attendance
+3. dashboard to view the percentage
+
+Pages:
+1. Subject adding Pages
+2. attendance Pages
+3. dashboard
