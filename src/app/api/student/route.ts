@@ -1,27 +1,46 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
-type AttendanceRecord = {
-  subject_id: string;
-  date: string;
-  present: boolean;
-};
 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const user_id = searchParams.get("user_id");
 
-export async function GET() {
-    const { data: attendanceRecords, error } = await supabase.from('attendance').select('*');
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    return NextResponse.json(attendanceRecords);
+  if (!user_id) {
+    return NextResponse.json({ error: "Missing user_id" }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from("attendance")
+    .select("*")
+    .eq("user_id", user_id)
+    .order("date", { ascending: false });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
 }
 
 export async function POST(request: Request) {
-    const {subject_id, date, present} = await request.json();
-    const newRecord: AttendanceRecord = { subject_id, date, present };
-    const { error } = await supabase.from('attendance').insert([newRecord]);
-    if (error) {
-        console.log(error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'Attendance recorded successfully', record: newRecord }, { status: 201 });
+  const { user_id, subject_id, date, present } = await request.json();
+
+  if (!user_id || !subject_id || !date) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  const { error } = await supabase.from("attendance").insert([
+    {
+      user_id,
+      subject_id,
+      date,
+      present,
+    },
+  ]);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ message: "Attendance recorded" }, { status: 201 });
 }

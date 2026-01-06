@@ -1,48 +1,63 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
 
-type Subject = {
-    id: string;
-  name: string;
-  code: string;
-};
-
-export async function GET() {
-    const { data, error } = await supabase.from('subjects').select('*');
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    return NextResponse.json(data);
-}
-
-export async function POST(request: Request) {
-    const { name, code } = await request.json();
-    const { error } = await supabase.from('subjects').insert([{ name, code }]);
-    return NextResponse.json({ message: 'Subject added successfully' }, { status: 201 });
-}
-
-export async function DELETE(request: Request) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  const user_id = searchParams.get("user_id");
 
-  if (!id) {
-    return NextResponse.json(
-      { error: 'Subject id is required' },
-      { status: 400 }
-    );
+  if (!user_id) {
+    return NextResponse.json({ error: "Missing user_id" }, { status: 400 });
   }
 
-  const { error } = await supabase
-    .from('subjects')
-    .delete()
-    .eq('id', id);
+  const { data, error } = await supabase
+    .from("subjects")
+    .select("*")
+    .eq("user_id", user_id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(
-    { message: 'Subject deleted successfully' },
-    { status: 200 }
-  );
+  return NextResponse.json(data);
+}
+
+export async function POST(request: Request) {
+  const { user_id, name, code } = await request.json();
+
+  if (!user_id) {
+    return NextResponse.json({ error: "Missing user_id" }, { status: 400 });
+  }
+
+  const { error } = await supabase.from("subjects").insert([
+    { user_id, name, code },
+  ]);
+
+  if (error) {
+    console.log(error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ message: "Subject added" }, { status: 201 });
+}
+
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  const user_id = searchParams.get("user_id");
+
+  if (!id || !user_id) {
+    return NextResponse.json({ error: "Missing params" }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from("subjects")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user_id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ message: "Deleted" });
 }

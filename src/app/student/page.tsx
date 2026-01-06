@@ -1,11 +1,14 @@
-'use client'
-import { useState, useEffect } from "react";
-type Subject = {
-    id: string;
-    name: string;
-    code: string;
-};
+'use client';
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+
+type Subject = {
+  id: string;
+  name: string;
+  code: string;
+};
 
 type AttendanceRecord = {
   subject_id: string;
@@ -14,135 +17,148 @@ type AttendanceRecord = {
 };
 
 export default function StudentPage() {
-    const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [selectedSubject, setSelectedSubject] = useState<string | "">("");
-    const [date, setDate] = useState("");
-    const [attendance, setAttendance] = useState("present");
-    const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [date, setDate] = useState("");
+  const [attendance, setAttendance] = useState("present");
+  const [userId, setUserId] = useState<string | null>(null);
 
-    async function fetchSubjects() {
-        const response = await fetch('/api/subject');
-        const data = await response.json();
-        console.log(data);
-        setSubjects(data);
+  const router = useRouter();
+
+  // ✅ Fetch subjects
+  async function fetchSubjects(uid: string) {
+    const res = await fetch(`/api/subject?user_id=${uid}`);
+    const data = await res.json();
+    setSubjects(Array.isArray(data) ? data : []);
+  }
+
+  // ✅ Fetch attendance
+  async function fetchAttendance(uid: string) {
+    const res = await fetch(`/api/student?user_id=${uid}`);
+    const data = await res.json();
+    setAttendanceRecords(Array.isArray(data) ? data : []);
+  }
+
+  // ✅ Auth + initial load
+  useEffect(() => {
+    const init = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+
+      setUserId(session.user.id);
+      await fetchSubjects(session.user.id);
+      await fetchAttendance(session.user.id);
+    };
+
+    init();
+  }, [router]);
+
+  // ✅ Default selected subject
+  useEffect(() => {
+    if (subjects.length > 0 && !selectedSubject) {
+      setSelectedSubject(subjects[0].id);
     }
+  }, [subjects, selectedSubject]);
 
-    
-  async function fetchAttendanceRecords() {
-    const response = await fetch('/api/student');
-    const data = await response.json();
-    console.log(data);
-    setAttendanceRecords(data);
+  // ✅ Submit attendance
+  async function handleSubmitAttendance(e: React.FormEvent) {
+    e.preventDefault();
+    if (!userId || !selectedSubject || !date) return;
+
+    const res = await fetch("/api/student", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        subject_id: selectedSubject,
+        date,
+        present: attendance === "present",
+      }),
+    });
+
+    if (res.ok) {
+      setDate("");
+      setAttendance("present");
+      fetchAttendance(userId);
+    }
   }
 
-    useEffect(() => {
-        fetchSubjects();
-        fetchAttendanceRecords();
-    }, []);
 
-    useEffect(() => {
-        if (subjects.length > 0 && !selectedSubject) {
-          setSelectedSubject(subjects[0].id);
-        }
-    }, [subjects, selectedSubject]);
-
-
-
-    async function handleSubmitAttendance(event: React.FormEvent) {
-        event.preventDefault();
-        if(selectedSubject === "" || !date) return;
-        var attendance_state = false;
-        if(attendance === "present") {
-          attendance_state = true;
-        } else {
-          attendance_state = false;
-        }
-        console.log({ subject_id: selectedSubject, date: date, present: attendance_state });
-        const response = await fetch('/api/student', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json', 
-          },
-          body: JSON.stringify({ subject_id: selectedSubject, date: date, present: attendance_state }),
-        });
-        if (response.ok) {
-          setSelectedSubject(subjects.length > 0 ? subjects[0].id : "");
-          setDate("");
-          setAttendance("present");
-          fetchSubjects();
-          fetchAttendanceRecords();
-        }
-  }
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-semibold text-gray-800 mb-12">Student Attendance</h1>
+        <h1 className="text-3xl font-semibold text-gray-800 mb-12">
+          Student Attendance
+        </h1>
 
-        <div className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-700 mb-6">Mark Attendance</h2>
+        {/* MARK ATTENDANCE */}
+        <form
+          onSubmit={handleSubmitAttendance}
+          className="border border-gray-200 rounded-lg p-6 bg-zinc-50 space-y-4 mb-12"
+        >
+          <div>
+            <label className="block text-sm font-medium mb-2">Subject</label>
+            <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            >
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.code})
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div>
-            <form className="border border-gray-200 rounded-lg p-6 bg-zinc-50" onSubmit={handleSubmitAttendance}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                  <select
-                    value={selectedSubject}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setSelectedSubject(value === "" ? "" : value);
-                    }}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
-                  >
-                    <option value="" disabled>
-                      -- Select subject --
-                    </option>
-
-                    {subjects.map(subject => (
-                      <option key={subject.code} value={subject.id}>
-                        {subject.name} ({subject.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                  <input type="date" className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300" value={date} onChange={(e) => setDate(e.target.value)} />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300" value={attendance} onChange={(e) => setAttendance(e.target.value)}>
-                    <option value="present">Present</option>
-                    <option value="absent">Absent</option>
-                  </select>
-                </div>
-
-                <button type="submit" className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium">
-                  Submit Attendance
-                </button>
-              </div>
-            </form>
+            <label className="block text-sm font-medium mb-2">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+              required
+            />
           </div>
-        </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-700">Attendance Records</h2>
-            <button onClick={fetchAttendanceRecords} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm">
-              Refresh
-            </button>
+          <div>
+            <label className="block text-sm font-medium mb-2">Status</label>
+            <select
+              value={attendance}
+              onChange={(e) => setAttendance(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="present">Present</option>
+              <option value="absent">Absent</option>
+            </select>
           </div>
-          <div className="border border-gray-200 rounded-lg overflow-hidden bg-zinc-50">
-            <ul className="divide-y divide-gray-200">
-              {attendanceRecords.map((record, index) => (
-                <li key={index} className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                  <span className="font-medium text-gray-800">{record.subject_id}</span> • {record.date} • <span className={record.present ? "text-green-600 font-medium" : "text-gray-600"}>{record.present ? "Present" : "Absent"}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+
+          <button className="w-full bg-gray-100 py-2 rounded hover:bg-gray-200">
+            Submit Attendance
+          </button>
+        </form>
+
+        {/* ATTENDANCE RECORDS */}
+        <div className="border rounded bg-zinc-50">
+          <ul className="divide-y">
+            {attendanceRecords.map((r, i) => (
+              <li key={i} className="px-4 py-3 text-sm">
+                {r.date} •{" "}
+                <span className={r.present ? "text-green-600" : "text-gray-500"}>
+                  {r.present ? "Present" : "Absent"}
+                </span>
+                  
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
