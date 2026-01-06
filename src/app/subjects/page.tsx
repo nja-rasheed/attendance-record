@@ -52,44 +52,56 @@ export default function SubjectsPage() {
   }
 
   return (
-    <div className="bg-gray-700 min-h-screen p-8">
-      <h1>Subjects Page</h1>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-12">Subjects</h1>
 
-      <div className="mt-8 mb-8">
-        <h2>Subjects List</h2>
-        <ul>
-          {subjects.map((subject, index) => (
-            <div key={index}>
-              <li key={subject.code}>
-                Subject Name: {subject.name} Subject Code: ({subject.code})
-              </li>
-              <button onClick={() => deleteSubject(subject.id)}>Delete Subject</button>
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold text-gray-700 mb-6">Subject List</h2>
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-zinc-50">
+            <ul className="divide-y divide-gray-200">
+              {subjects.map((subject, index) => (
+                <div key={index} className="px-4 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                  <li key={subject.code} className="text-sm text-gray-800 flex-1">
+                    <span className="font-medium">{subject.name}</span> <span className="text-gray-500">({subject.code})</span>
+                  </li>
+                  <button onClick={() => deleteSubject(subject.id)} className="ml-4 px-3 py-1 text-sm bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors">Delete</button>
+                </div>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-6">Add New Subject</h2>
+          <form onSubmit={handleAddSubject} className="border border-gray-200 rounded-lg p-6 bg-zinc-50">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Subject Name</label>
+                <input
+                  type="text"
+                  name="subjectName"
+                  value={subjectName}
+                  onChange={(e) => setSubjectName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  placeholder="e.g., Mathematics"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Subject Code</label>
+                <input
+                  type="text"
+                  name="subjectCode"
+                  value={subjectCode}
+                  onChange={(e) => setSubjectCode(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  placeholder="e.g., MATH101"
+                />
+              </div>
+              <button type="submit" className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium">Add Subject</button>
             </div>
-          ))}
-        </ul>
-      </div>
-
-      <div>
-        <form onSubmit={handleAddSubject} className="flex flex-col gap-4">
-          <h2>Add New Subject</h2>
-          <label>Subject Name: </label>
-          <input
-            type="text"
-            name="subjectName"
-            value={subjectName}
-            onChange={(e) => setSubjectName(e.target.value)}
-            className="bg-gray-500 rounded"
-          />
-          <label> Subject Code: </label>
-          <input
-            type="text"
-            name="subjectCode"
-            value={subjectCode}
-            onChange={(e) => setSubjectCode(e.target.value)}
-            className="bg-gray-500 rounded"
-          />
-          <button type="submit" className="bg-gray-400 rounded">Add Subject</button>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   )

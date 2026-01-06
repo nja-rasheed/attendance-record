@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type Subject = {
     id: string;
@@ -10,6 +11,7 @@ type Subject = {
 export default function HomePage() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [percentages, setPercentages] = useState<Record<string, number>>({});
+    const router = useRouter();
 
     async function fetchSubjects() {
         const response = await fetch('/api/subject');
@@ -39,24 +41,37 @@ export default function HomePage() {
         fetchSubjects();
     }, []);
   return (
-    <main>
-      <h1>Welcome to AttendTracker</h1>
+    <main className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-12">Welcome to AttendTracker</h1>
 
-      <div>
-        <h2>Subjects</h2>
-        <ul>
-          {subjects.map((subject) => (
-            <div key={subject.id}>
-                <li key={subject.id}>
-                {subject.name} ({subject.code})
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold text-gray-700 mb-6">Subjects</h2>
+          <ul className="space-y-4">
+            {subjects.map((subject) => (
+              <div key={subject.id} className="border border-gray-200 rounded-lg p-4 bg-zinc-50 hover:bg-gray-50 transition-colors">
+                <li key={subject.id} className="text-gray-800 mb-3">
+                  {subject.name} <span className="text-gray-500 text-sm">({subject.code})</span>
                 </li>
-                <button onClick={() => fetchAttendancePercentage(subject.id)}>Get Attendance Percentage</button>
+                <button onClick={() => fetchAttendancePercentage(subject.id)} className="text-sm px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                  Get Attendance Percentage
+                </button>
                 {percentages[subject.id] !== undefined && (
-                  <p>Attendance Percentage: {percentages[subject.id]}%</p>
+                  <p className="text-sm text-gray-600 mt-3">Attendance: <span className="font-medium text-gray-800">{percentages[subject.id]}%</span></p>
                 )}
-            </div>
-          ))}
-        </ul>
+              </div>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex gap-3">
+          <button onClick={() => router.push("/subjects")} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium">
+            Subjects Page
+          </button>
+          <button onClick={() => router.push("/student")} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium">
+            Student Attendance
+          </button>
+        </div>
       </div>
     </main>
   );

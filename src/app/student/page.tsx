@@ -74,56 +74,77 @@ export default function StudentPage() {
         }
   }
   return (
-    <div className="bg-gray-700 min-h-screen p-8">
-      <h1>Student Page</h1>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-12">Student Attendance</h1>
 
-        <h2 className="mt-8 mb-8">Attendance</h2>
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold text-gray-700 mb-6">Mark Attendance</h2>
 
-      <div>
-            <form className="mb-4" onSubmit={handleSubmitAttendance}>
-                <label>Select Subject: </label>
-                <select
+          <div>
+            <form className="border border-gray-200 rounded-lg p-6 bg-zinc-50" onSubmit={handleSubmitAttendance}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                  <select
                     value={selectedSubject}
                     onChange={(e) => {
-                        const value = e.target.value;
-                        setSelectedSubject(value === "" ? "" : value);
-                        }}
-                    >
+                      const value = e.target.value;
+                      setSelectedSubject(value === "" ? "" : value);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  >
                     <option value="" disabled>
-                        -- Select subject --
+                      -- Select subject --
                     </option>
 
                     {subjects.map(subject => (
-                        <option key={subject.code} value={subject.id}>
+                      <option key={subject.code} value={subject.id}>
                         {subject.name} ({subject.code})
-                        </option>
+                      </option>
                     ))}
-                </select>
+                  </select>
+                </div>
 
-                <input type="date" className="ml-4" value={date} onChange={(e) => setDate(e.target.value)} />
-                <select className="ml-4" value={attendance} onChange={(e) => setAttendance(e.target.value)}>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                  <input type="date" className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300" value={date} onChange={(e) => setDate(e.target.value)} />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select className="w-full px-3 py-2 border border-gray-200 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300" value={attendance} onChange={(e) => setAttendance(e.target.value)}>
                     <option value="present">Present</option>
                     <option value="absent">Absent</option>
-                </select>
-                <button type="submit" className="ml-4 px-4 py-2 bg-blue-500 text-white rounded">
-                    Submit Attendance
-                </button>
-            </form>
-        </div>
-      <div className="mt-8 mb-8">
-        <h2>Attendance Records</h2>
-        <button onClick={fetchAttendanceRecords} className="mb-4 px-4 py-2 bg-green-500 text-white rounded">
-          Refresh Attendance Records
-        </button>
-        <ul>
-          {attendanceRecords.map((record, index) => (
-            <li key={index}>
-              Subject: {record.subject_id}, Date: {record.date}, Attendance: {record.present ? "Present" : "Absent"}
-            </li>
-          ))}
-        </ul>
-      </div>
+                  </select>
+                </div>
 
+                <button type="submit" className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium">
+                  Submit Attendance
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-700">Attendance Records</h2>
+            <button onClick={fetchAttendanceRecords} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm">
+              Refresh
+            </button>
+          </div>
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-zinc-50">
+            <ul className="divide-y divide-gray-200">
+              {attendanceRecords.map((record, index) => (
+                <li key={index} className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                  <span className="font-medium text-gray-800">{record.subject_id}</span> • {record.date} • <span className={record.present ? "text-green-600 font-medium" : "text-gray-600"}>{record.present ? "Present" : "Absent"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
