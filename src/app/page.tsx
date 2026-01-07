@@ -72,9 +72,9 @@ export default function HomePage() {
             {subjects.map((subject) => (
               <div key={subject.id} className="border border-gray-200 rounded-lg p-4 bg-zinc-50 hover:bg-gray-50 transition-colors">
                 <li key={subject.id} className="text-gray-800 mb-3">
-                  {subject.name} <span className="text-gray-500 text-sm">({subject.code})</span>
+                  {subject.name} <span className="text-gray-700 text-sm">({subject.code})</span>
                 </li>
-                <button onClick={() => fetchAttendancePercentage(subject.id, user)} className="text-sm px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                <button onClick={() => fetchAttendancePercentage(subject.id, user)} className="text-sm px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
                   Get Attendance Percentage
                 </button>
                 {percentages[subject.id] !== undefined && (
@@ -87,10 +87,10 @@ export default function HomePage() {
         </div>
 
         <div className="flex gap-3">
-          <button onClick={() => router.push("/subjects")} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium">
+          <button onClick={() => router.push("/subjects")} className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
             Subjects Page
           </button>
-          <button onClick={() => router.push("/student")} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm font-medium">
+          <button onClick={() => router.push("/student")} className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
             Student Attendance
           </button>
         </div>

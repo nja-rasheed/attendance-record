@@ -107,11 +107,11 @@ export default function StudentPage() {
           className="border border-gray-200 rounded-lg p-6 bg-zinc-50 space-y-4 mb-12"
         >
           <div>
-            <label className="block text-sm font-medium mb-2">Subject</label>
+            <label className="block text-sm font-medium mb-2 text-gray-800">Subject</label>
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-400 rounded px-3 py-2 text-gray-800"
             >
               {subjects.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -122,29 +122,29 @@ export default function StudentPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Date</label>
+            <label className="block text-sm font-medium mb-2 text-gray-800">Date</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-400 rounded px-3 py-2 text-gray-800"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Status</label>
+            <label className="block text-sm font-medium mb-2 text-gray-800">Status</label>
             <select
               value={attendance}
               onChange={(e) => setAttendance(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-400 rounded px-3 py-2 text-gray-800"
             >
               <option value="present">Present</option>
               <option value="absent">Absent</option>
             </select>
           </div>
 
-          <button className="w-full bg-gray-100 py-2 rounded hover:bg-gray-200">
+          <button className="w-full bg-gray-700 text-white py-2 rounded hover:bg-gray-800 font-medium">
             Submit Attendance
           </button>
         </form>
@@ -153,9 +153,9 @@ export default function StudentPage() {
         <div className="border rounded bg-zinc-50">
           <ul className="divide-y">
             {attendanceRecords.map((r, i) => (
-              <li key={i} className="px-4 py-3 text-sm">
+              <li key={i} className="px-4 py-3 text-sm text-gray-800">
                 {r.date} •{" "}
-                <span className={r.present ? "text-green-600" : "text-gray-500"}>
+                <span className={r.present ? "text-green-600" : "text-gray-700"}>
                   {r.present ? "Present" : "Absent"}
                 </span>
                   

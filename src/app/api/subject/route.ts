@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   }
 
   const { error } = await supabase.from("subjects").insert([
-    { user_id, name, code },
+    { name, code, user_id },
   ]);
 
   if (error) {
