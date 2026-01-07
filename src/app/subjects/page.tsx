@@ -15,6 +15,7 @@ export default function SubjectsPage() {
   const [subjectName, setSubjectName] = useState("");
   const [subjectCode, setSubjectCode] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [error_msg, setErrorMsg] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
 
   const router = useRouter();
@@ -68,6 +69,8 @@ export default function SubjectsPage() {
         code: subjectCode,
       }),
     });
+    const data = await response.json();
+    if (data.error) return setErrorMsg(data.error);
 
     if (response.ok) {
       setSubjectName("");
@@ -179,6 +182,7 @@ export default function SubjectsPage() {
             >
               Add Subject
             </button>
+            {error_msg && <div className="p-4 text-red-600">{error_msg}</div>}
           </form>
         </div>
       </div>

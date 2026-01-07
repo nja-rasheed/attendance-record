@@ -22,6 +22,7 @@ export default function StudentPage() {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [date, setDate] = useState("");
   const [attendance, setAttendance] = useState("present");
+  const [error_msg, setErrorMsg] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
 
   const router = useRouter();
@@ -82,6 +83,8 @@ export default function StudentPage() {
         present: attendance === "present",
       }),
     });
+    const data = await res.json();
+    if (data.error) return setErrorMsg(data.error);
 
     if (res.ok) {
       setDate("");
@@ -159,6 +162,7 @@ export default function StudentPage() {
               </li>
             ))}
           </ul>
+          {error_msg && <div className="p-4 text-red-600">{error_msg}</div>}
         </div>
       </div>
     </div>

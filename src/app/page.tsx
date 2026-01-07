@@ -13,6 +13,7 @@ export default function HomePage() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [percentages, setPercentages] = useState<Record<string, number>>({});
     const [user, setUser] = useState<string>("");
+    const [error_msg, setErrorMsg] = useState("");
     const router = useRouter();
 
     async function fetchSubjects(userId: string) {
@@ -34,6 +35,10 @@ export default function HomePage() {
       });
 
       const data = await response.json();
+      if (data.error) {
+        setErrorMsg(data.error);
+        return;
+      }
       setPercentages((prev) => ({
         ...prev,
         [subject_id]: data.percentage,
@@ -78,6 +83,7 @@ export default function HomePage() {
               </div>
             ))}
           </ul>
+          {error_msg && <div className="p-4 text-red-600">{error_msg}</div>}
         </div>
 
         <div className="flex gap-3">
