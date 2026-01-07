@@ -57,6 +57,7 @@ export default function SubjectsPage() {
   async function handleAddSubject(event: React.FormEvent) {
     event.preventDefault();
     if (!subjectName || !subjectCode || !userId) return;
+    console.log(userId);
 
     const response = await fetch("/api/subject", {
       method: "POST",
