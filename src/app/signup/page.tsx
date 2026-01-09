@@ -26,7 +26,7 @@ export default function SignupPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+                <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Sign Up</h2>
                 <form className="space-y-4" onSubmit={handleSignup}>
                     <div>
                         <label className="block text-sm font-medium mb-1 text-gray-800" htmlFor="email">Email</label>
