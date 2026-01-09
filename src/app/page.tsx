@@ -12,12 +12,11 @@ type Subject = {
 export default function HomePage() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [percentages, setPercentages] = useState<Record<string, number>>({});
-    const [user, setUser] = useState<string>("");
     const [error_msg, setErrorMsg] = useState("");
     const router = useRouter();
 
-    async function fetchSubjects(userId: string) {
-      const response = await fetch(`/api/subject?user_id=${userId}`);
+    async function fetchSubjects() {
+      const response = await fetch(`/api/subject`);
       const data = await response.json();
 
       setSubjects(Array.isArray(data) ? data : []);
@@ -25,13 +24,13 @@ export default function HomePage() {
 
 
 
-    async function fetchAttendancePercentage(subject_id: string, user_id: string) {
+    async function fetchAttendancePercentage(subject_id: string) {
       const response = await fetch("/api/percentage", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ subject_id, user_id }),
+        body: JSON.stringify({ subject_id }),
       });
 
       const data = await response.json();
@@ -54,8 +53,7 @@ export default function HomePage() {
         router.push("/login");
         return;
       }
-      setUser(session.user.id);
-      await fetchSubjects(session.user.id);
+      await fetchSubjects();
     };
 
     checkAuthAndLoad();
@@ -74,7 +72,7 @@ export default function HomePage() {
                 <li key={subject.id} className="text-gray-800 mb-3">
                   {subject.name} <span className="text-gray-700 text-sm">({subject.code})</span>
                 </li>
-                <button onClick={() => fetchAttendancePercentage(subject.id, user)} className="text-sm px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
+                <button onClick={() => fetchAttendancePercentage(subject.id)} className="text-sm px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
                   Get Attendance Percentage
                 </button>
                 {percentages[subject.id] !== undefined && (

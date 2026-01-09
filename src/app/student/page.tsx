@@ -23,20 +23,19 @@ export default function StudentPage() {
   const [date, setDate] = useState("");
   const [attendance, setAttendance] = useState("present");
   const [error_msg, setErrorMsg] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
 
   const router = useRouter();
 
   // ✅ Fetch subjects
-  async function fetchSubjects(uid: string) {
-    const res = await fetch(`/api/subject?user_id=${uid}`);
+  async function fetchSubjects() {
+    const res = await fetch(`/api/subject`);
     const data = await res.json();
     setSubjects(Array.isArray(data) ? data : []);
   }
 
   // ✅ Fetch attendance
-  async function fetchAttendance(uid: string) {
-    const res = await fetch(`/api/student?user_id=${uid}`);
+  async function fetchAttendance() {
+    const res = await fetch(`/api/student`);
     const data = await res.json();
     setAttendanceRecords(Array.isArray(data) ? data : []);
   }
@@ -52,10 +51,8 @@ export default function StudentPage() {
         router.push("/login");
         return;
       }
-
-      setUserId(session.user.id);
-      await fetchSubjects(session.user.id);
-      await fetchAttendance(session.user.id);
+      await fetchSubjects();
+      await fetchAttendance();
     };
 
     init();
@@ -71,13 +68,12 @@ export default function StudentPage() {
   // ✅ Submit attendance
   async function handleSubmitAttendance(e: React.FormEvent) {
     e.preventDefault();
-    if (!userId || !selectedSubject || !date) return;
+    if ( !selectedSubject || !date) return;
 
     const res = await fetch("/api/student", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        user_id: userId,
         subject_id: selectedSubject,
         date,
         present: attendance === "present",
@@ -89,7 +85,7 @@ export default function StudentPage() {
     if (res.ok) {
       setDate("");
       setAttendance("present");
-      fetchAttendance(userId);
+      fetchAttendance();
     }
   }
 

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function POST(request: Request) {
-  const { user_id, subject_id } = await request.json();
+  const supabase = await createSupabaseServerClient();
+  const {data: { user } } = await supabase.auth.getUser();
+  const user_id = user?.id;
+  const { subject_id } = await request.json();
 
   // 1️⃣ Validate input
   if (!user_id || !subject_id) {

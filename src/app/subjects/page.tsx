@@ -16,13 +16,12 @@ export default function SubjectsPage() {
   const [subjectCode, setSubjectCode] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [error_msg, setErrorMsg] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
 
   const router = useRouter();
 
   // ✅ Fetch subjects for this user
-  async function fetchSubjects(uid: string) {
-    const response = await fetch(`/api/subject?user_id=${uid}`);
+  async function fetchSubjects() {
+    const response = await fetch(`/api/subject`);
     const data = await response.json();
 
     if (!Array.isArray(data)) {
@@ -45,9 +44,7 @@ export default function SubjectsPage() {
         router.push("/login");
         return;
       }
-
-      setUserId(session.user.id);
-      await fetchSubjects(session.user.id);
+      await fetchSubjects();
     };
 
     init();
@@ -56,8 +53,7 @@ export default function SubjectsPage() {
   // ✅ Add subject
   async function handleAddSubject(event: React.FormEvent) {
     event.preventDefault();
-    if (!subjectName || !subjectCode || !userId) return;
-    console.log(userId);
+    if (!subjectName || !subjectCode ) return;
 
     const response = await fetch("/api/subject", {
       method: "POST",
@@ -65,7 +61,6 @@ export default function SubjectsPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: userId,
         name: subjectName,
         code: subjectCode,
       }),
@@ -76,21 +71,20 @@ export default function SubjectsPage() {
     if (response.ok) {
       setSubjectName("");
       setSubjectCode("");
-      fetchSubjects(userId);
+      fetchSubjects();
     }
   }
 
   // ✅ Delete subject
   async function deleteSubject(id: string) {
-    if (!userId) return;
 
     const response = await fetch(
-      `/api/subject?id=${id}&user_id=${userId}`,
+      `/api/subject?id=${id}`,
       { method: "DELETE" }
     );
 
     if (response.ok) {
-      fetchSubjects(userId);
+      fetchSubjects();
     }
   }
 

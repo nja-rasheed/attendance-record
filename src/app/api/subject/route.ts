@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const user_id = searchParams.get("user_id");
+  const supabase = await createSupabaseServerClient();
+
+  const {data: { user } } = await supabase.auth.getUser();
+  const user_id = user?.id;
 
   if (!user_id) {
     return NextResponse.json({ error: "Missing user_id" }, { status: 400 });
@@ -22,7 +24,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { user_id, name, code } = await request.json();
+  const supabase = await createSupabaseServerClient();
+  const {data: { user } } = await supabase.auth.getUser();
+  const user_id = user?.id;
+
+  const { name, code } = await request.json();
 
   if (!user_id) {
     return NextResponse.json({ error: "Missing user_id" }, { status: 400 });
@@ -41,9 +47,12 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const supabase = await createSupabaseServerClient();
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  const user_id = searchParams.get("user_id");
+  const {data: { user } } = await supabase.auth.getUser();
+  const user_id = user?.id;
 
   if (!id || !user_id) {
     return NextResponse.json({ error: "Missing params" }, { status: 400 });
