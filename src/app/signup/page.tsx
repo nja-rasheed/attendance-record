@@ -7,9 +7,11 @@ export default function SignupPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     async function handleSignup(event: React.FormEvent) {
         event.preventDefault();
+        setIsLoading(true);
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -20,6 +22,7 @@ export default function SignupPage() {
         }
         else {
             console.log("Signup successful:", data);
+            setIsLoading(false);
             router.push("/login");
         }
     }
@@ -50,12 +53,22 @@ export default function SignupPage() {
                             required
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
-                    >
-                        Sign Up
-                    </button>
+                    {isLoading ? (
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
+                            disabled
+                        >
+                            Loading...
+                        </button>
+                    ) : (
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
+                        >
+                            Sign Up
+                        </button>
+                    )}
                     <label className="block text-sm font-medium mt-4 text-center text-gray-800">
                         Already have an account? <a href="/login" className="text-blue-500 hover:underline">Login here</a>
                     </label>

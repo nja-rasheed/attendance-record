@@ -22,6 +22,8 @@ export default function StudentPage() {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [date, setDate] = useState("");
   const [attendance, setAttendance] = useState("present");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingAttendance, setIsFetchingAttendance] = useState(false);
   const [error_msg, setErrorMsg] = useState("");
 
   const router = useRouter();
@@ -35,9 +37,11 @@ export default function StudentPage() {
 
   // ✅ Fetch attendance
   async function fetchAttendance() {
+    setIsFetchingAttendance(true);
     const res = await fetch(`/api/student`);
     const data = await res.json();
     setAttendanceRecords(Array.isArray(data) ? data : []);
+    setIsFetchingAttendance(false);
   }
 
   // ✅ Auth + initial load
@@ -68,6 +72,7 @@ export default function StudentPage() {
   // ✅ Submit attendance
   async function handleSubmitAttendance(e: React.FormEvent) {
     e.preventDefault();
+    setIsLoading(true);
     if ( !selectedSubject || !date) return;
 
     const res = await fetch("/api/student", {
@@ -86,6 +91,7 @@ export default function StudentPage() {
       setDate("");
       setAttendance("present");
       fetchAttendance();
+      setIsLoading(false);
     }
   }
 
@@ -140,18 +146,30 @@ export default function StudentPage() {
             </select>
           </div>
 
-          <button className="w-full bg-gray-700 text-white py-2 rounded hover:bg-gray-800 font-medium">
-            Submit Attendance
-          </button>
+          {isLoading ? (
+            <button
+              className="w-full bg-gray-700 text-white py-2 rounded hover:bg-gray-800 font-medium"
+              disabled
+            >
+              Loading...
+            </button>
+          ) : (
+            <button className="w-full bg-gray-700 text-white py-2 rounded hover:bg-gray-800 font-medium">
+              Submit Attendance
+            </button>
+          )}
         </form>
 
         {/* ATTENDANCE RECORDS */}
-        <div className="border rounded bg-zinc-50">
-          <ul className="divide-y">
-            {attendanceRecords.map((r, i) => (
-              <li key={i} className="px-4 py-3 text-sm text-gray-800">
-                {r.date} •{" "}
-                <span className={r.present ? "text-green-600" : "text-gray-700"}>
+        {isFetchingAttendance ? (
+          <p className="text-xl font-semibold text-gray-700 mb-6">Loading attendance records...</p>
+        ) : (
+          <div className="border rounded bg-zinc-50">
+            <ul className="divide-y">
+              {attendanceRecords.map((r, i) => (
+                <li key={i} className="px-4 py-3 text-sm text-gray-800">
+                  {r.date} •{" "}
+                  <span className={r.present ? "text-green-600" : "text-gray-700"}>
                   {r.present ? "Present" : "Absent"}
                 </span>
                   
@@ -160,6 +178,7 @@ export default function StudentPage() {
           </ul>
           {error_msg && <div className="p-4 text-red-600">{error_msg}</div>}
         </div>
+        )}
       </div>
     </div>
   );

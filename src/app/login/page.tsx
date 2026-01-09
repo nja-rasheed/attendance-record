@@ -8,10 +8,12 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     async function handleLogin(event: React.FormEvent) {
         event.preventDefault();
+        setIsLoading(true);
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -19,9 +21,11 @@ export default function LoginPage() {
         if (error) {
             console.error("Error logging in:", error.message);
             setErrorMsg(error.message);
+            setIsLoading(false);
         }
         else {
             console.log("Login successful:", data);
+            setIsLoading(false);
             router.push("/");
         }
     }
@@ -53,12 +57,22 @@ export default function LoginPage() {
                             required
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
-                    >
-                        Login
-                    </button>
+                    {isLoading ? (
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
+                            disabled
+                        >
+                            Loading...
+                        </button>
+                    ) : (
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
+                        >
+                            Login
+                        </button>
+                    )}
 
                     <label className="block text-sm font-medium mb-1 text-center mt-4 text-gray-800">
                         Don't have an account?{' '}

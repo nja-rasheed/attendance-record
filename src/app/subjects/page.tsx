@@ -15,12 +15,15 @@ export default function SubjectsPage() {
   const [subjectName, setSubjectName] = useState("");
   const [subjectCode, setSubjectCode] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error_msg, setErrorMsg] = useState("");
 
   const router = useRouter();
 
   // ✅ Fetch subjects for this user
   async function fetchSubjects() {
+    setIsFetching(true);
     const response = await fetch(`/api/subject`);
     const data = await response.json();
 
@@ -31,6 +34,7 @@ export default function SubjectsPage() {
     }
 
     setSubjects(data);
+    setIsFetching(false);
   }
 
   // ✅ Auth check + initial load
@@ -53,6 +57,8 @@ export default function SubjectsPage() {
   // ✅ Add subject
   async function handleAddSubject(event: React.FormEvent) {
     event.preventDefault();
+    setIsLoading(true);
+    setErrorMsg("");
     if (!subjectName || !subjectCode ) return;
 
     const response = await fetch("/api/subject", {
@@ -72,11 +78,13 @@ export default function SubjectsPage() {
       setSubjectName("");
       setSubjectCode("");
       fetchSubjects();
+      setIsLoading(false);
     }
   }
 
   // ✅ Delete subject
   async function deleteSubject(id: string) {
+    setIsLoading(true);
 
     const response = await fetch(
       `/api/subject?id=${id}`,
@@ -85,6 +93,7 @@ export default function SubjectsPage() {
 
     if (response.ok) {
       fetchSubjects();
+      setIsLoading(false);
     }
   }
 
@@ -97,31 +106,44 @@ export default function SubjectsPage() {
 
         {/* SUBJECT LIST */}
         <div className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-700 mb-6">
-            Subject List
-          </h2>
+          {isFetching ? (
+            <p className="text-xl font-semibold text-gray-700 mb-6">Loading subjects...</p>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold text-gray-700 mb-6">
+                Subject List
+              </h2>
 
-          <div className="border border-gray-200 rounded-lg bg-zinc-50">
-            <ul className="divide-y divide-gray-200">
-              {subjects.map((subject) => (
-                <li
-                  key={subject.id}
-                  className="px-4 py-4 flex items-center justify-between hover:bg-gray-50"
-                >
-                  <span className="text-sm text-gray-800">
-                    <span className="font-medium">{subject.name}</span>{" "}
-                    <span className="text-gray-700">
-                      ({subject.code})
-                    </span>
-                  </span>
-
-                  <button
-                    onClick={() => deleteSubject(subject.id)}
-                    className="px-3 py-1 text-sm bg-red-50 text-red-600 rounded-md hover:bg-red-100"
+            <div className="border border-gray-200 rounded-lg bg-zinc-50">
+              <ul className="divide-y divide-gray-200">
+                {subjects.map((subject) => (
+                  <li
+                    key={subject.id}
+                    className="px-4 py-4 flex items-center justify-between hover:bg-gray-50"
                   >
-                    Delete
-                  </button>
-                </li>
+                    <span className="text-sm text-gray-800">
+                      <span className="font-medium">{subject.name}</span>{" "}
+                      <span className="text-gray-700">
+                        ({subject.code})
+                      </span>
+                    </span>
+
+                    {isLoading ? (
+                      <button
+                        disabled
+                        className="px-3 py-1 text-sm bg-red-50 text-red-600 rounded-md"
+                      >
+                        Deleting...
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => deleteSubject(subject.id)}
+                        className="px-3 py-1 text-sm bg-red-50 text-red-600 rounded-md hover:bg-red-100"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </li>
               ))}
 
               {subjects.length === 0 && (
@@ -131,6 +153,8 @@ export default function SubjectsPage() {
               )}
             </ul>
           </div>
+          </>
+          )}
         </div>
 
         {/* ADD SUBJECT */}
@@ -171,12 +195,22 @@ export default function SubjectsPage() {
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 text-sm font-medium"
-            >
-              Add Subject
-            </button>
+            {isLoading ? (
+              <button
+                type="submit"
+                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 text-sm font-medium"
+                disabled
+              >
+                Loading...
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 text-sm font-medium"
+              >
+                Add Subject
+              </button>
+            )}
             {error_msg && <div className="p-4 text-red-600">{error_msg}</div>}
           </form>
         </div>

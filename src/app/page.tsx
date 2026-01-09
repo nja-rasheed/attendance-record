@@ -12,19 +12,24 @@ type Subject = {
 export default function HomePage() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [percentages, setPercentages] = useState<Record<string, number>>({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(false);
     const [error_msg, setErrorMsg] = useState("");
     const router = useRouter();
 
     async function fetchSubjects() {
+      setIsFetching(true);
       const response = await fetch(`/api/subject`);
       const data = await response.json();
 
       setSubjects(Array.isArray(data) ? data : []);
+      setIsFetching(false);
     }
 
 
 
     async function fetchAttendancePercentage(subject_id: string) {
+      setIsLoading(true);
       const response = await fetch("/api/percentage", {
         method: "POST",
         headers: {
@@ -42,6 +47,7 @@ export default function HomePage() {
         ...prev,
         [subject_id]: data.percentage,
       }));
+      setIsLoading(false);
   }
 
   useEffect(() => {
@@ -64,17 +70,34 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-semibold text-gray-800 mb-12">Welcome to AttendTracker</h1>
 
-        <div className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-700 mb-6">Subjects</h2>
-          <ul className="space-y-4">
-            {subjects.map((subject) => (
-              <div key={subject.id} className="border border-gray-200 rounded-lg p-4 bg-zinc-50 hover:bg-gray-50 transition-colors">
-                <li key={subject.id} className="text-gray-800 mb-3">
+        {isFetching ? (
+          <p className="text-xl font-semibold text-gray-700 mb-6">Loading subjects...</p>
+        ) : (
+          <div className="mb-12">
+            <h2 className="text-xl font-semibold text-gray-700 mb-6">Subjects</h2>
+            <ul className="space-y-4">
+              {subjects.map((subject) => (
+                <div key={subject.id} className="border border-gray-200 rounded-lg p-4 bg-zinc-50 hover:bg-gray-50 transition-colors">
+                  <li key={subject.id} className="text-gray-800 mb-3">
                   {subject.name} <span className="text-gray-700 text-sm">({subject.code})</span>
                 </li>
-                <button onClick={() => fetchAttendancePercentage(subject.id)} className="text-sm px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
-                  Get Attendance Percentage
-                </button>
+                {isLoading ? (
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
+                            disabled
+                        >
+                            Loading...
+                        </button>
+                    ) : (
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-medium"
+                            onClick={() => fetchAttendancePercentage(subject.id)}
+                        >
+                            Get Attendance Percentage
+                        </button>
+                    )}
                 {percentages[subject.id] !== undefined && (
                   <p className="text-sm text-gray-600 mt-3">Attendance: <span className="font-medium text-gray-800">{percentages[subject.id]}%</span></p>
                 )}
@@ -83,6 +106,7 @@ export default function HomePage() {
           </ul>
           {error_msg && <div className="p-4 text-red-600">{error_msg}</div>}
         </div>
+        )}
 
         <div className="flex gap-3">
           <button onClick={() => router.push("/subjects")} className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium">
