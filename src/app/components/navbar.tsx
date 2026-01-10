@@ -3,12 +3,15 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const [mobileMenuHeight, setMobileMenuHeight] = useState(0);
 
   const links = [
     { href: '/', label: 'Dashboard' },
@@ -43,6 +46,14 @@ export default function Navbar() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen && mobileMenuRef.current) {
+      setMobileMenuHeight(mobileMenuRef.current.scrollHeight);
+    } else {
+      setMobileMenuHeight(0);
+    }
+  }, [isMobileMenuOpen, isUserLoggedIn]);
 
   return (
     <nav className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 shadow-sm">
@@ -102,7 +113,8 @@ export default function Navbar() {
             <button
               type="button"
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none"
-              aria-expanded="false"
+              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             >
               <span className="sr-only">Open main menu</span>
               <svg
@@ -119,6 +131,61 @@ export default function Navbar() {
                 />
               </svg>
             </button>
+          </div>
+        </div>
+        {/* Mobile Menu Dropdown with animation */}
+        <div
+          className="md:hidden overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            maxHeight: isMobileMenuOpen ? `${mobileMenuHeight}px` : '0px',
+            opacity: isMobileMenuOpen ? 1 : 0,
+          }}
+        >
+          <div ref={mobileMenuRef} className="mt-2 space-y-1 pb-4">
+            {isUserLoggedIn ? (
+              <>
+                {links.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`block px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive(link.href)
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left mt-2 px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="block px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className="block px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
